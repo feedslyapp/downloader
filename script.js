@@ -8,27 +8,26 @@ form.addEventListener("submit", async (event) => {
 	event.preventDefault();
 	const videoUrl = urlInput.value;
 
-	// Clear previous results and messages
 	resultsContainer.innerHTML = "";
 	statusMessage.textContent = "";
 	statusMessage.classList.remove("error");
 
-	// Basic validation
 	if (!videoUrl) {
 		statusMessage.textContent = "Please enter a URL.";
 		statusMessage.classList.add("error");
 		return;
 	}
 
-	// UI feedback for loading
 	submitButton.disabled = true;
 	submitButton.textContent = "Processing...";
 	statusMessage.textContent = "Fetching video data";
 	statusMessage.classList.add("loading");
 
 	try {
-		// Send the URL to our backend server
-		const response = await fetch("http://localhost:3000/download", {
+		// CRITICAL CHANGE HERE: Use a relative URL.
+		// This will send the request to the same server that served the page,
+		// which works perfectly for both local and Render deployment.
+		const response = await fetch("/download", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -47,12 +46,11 @@ form.addEventListener("submit", async (event) => {
 		statusMessage.textContent = error.message;
 		statusMessage.classList.add("error");
 	} finally {
-		// Restore UI
 		submitButton.disabled = false;
 		submitButton.textContent = "Download";
 		statusMessage.classList.remove("loading");
 		if (!statusMessage.classList.contains("error")) {
-			statusMessage.textContent = ""; // Clear loading message on success
+			statusMessage.textContent = "";
 		}
 	}
 });
@@ -62,7 +60,6 @@ function displayResults(data) {
 
 	let linksHtml = "";
 	formats.forEach((format) => {
-		// The 'download' attribute suggests a filename to the browser
 		linksHtml += `<a href="${format.url}" target="_blank" download>${format.quality}</a>`;
 	});
 
